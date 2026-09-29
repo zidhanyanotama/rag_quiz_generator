@@ -1,0 +1,8 @@
+
+Flask
+pdfplumber
+google-genai
+langchain-text-splitters
+langchain-core
+langchain-community
+faiss-cpu
