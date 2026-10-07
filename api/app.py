@@ -1,4 +1,3 @@
-
 import os
 import re
 import pdfplumber
@@ -68,10 +67,6 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return send_from_directory("../public", "index.html")
-
-@app.route("/<path:filename>")
-def public_files(filename):
-    return send_from_directory("../public", filename)
 
 # ==============================================================================
 # RETRIEVE API KEY FROM GOOGLE COLAB SECRETS
