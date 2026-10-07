@@ -2,16 +2,11 @@ import os
 import re
 import pdfplumber
 import time
-#import gradio as gr
 from flask import Flask, request, send_from_directory
 from google import genai
 from google.genai import types
-#from google.colab import userdata  # Mengambil API key dari Colab Secrets
-
-# Impor terbaru dari langchain_text_splitters dan langchain_core
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-#from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
 class GeminiEmbeddings:
@@ -159,7 +154,11 @@ def process_pdf_files(rps_file, modul_file):
     # ==============================================================================
     # TAHAP 3: VECTOR DATABASE INDEXING (FAISS)
     # ==============================================================================
+    print("DEBUG: mulai FAISS.from_documents()", flush=True)
+
     vector_store = FAISS.from_documents(chunks, embedding_model)
+    
+    print("DEBUG: FAISS.from_documents() SELESAI", flush=True)
 
     return f"✅ Berhasil memproses dokumen!\n- Total Dokumen Ingesti: {len(all_documents)} halaman\n- Total Chunks Diindeks: {len(chunks)} segmen ke FAISS VectorDB."
 
