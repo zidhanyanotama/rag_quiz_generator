@@ -1,8 +1,7 @@
-
 Flask
 pdfplumber
 google-genai
+faiss-cpu
 langchain-text-splitters
 langchain-core
 langchain-community
-faiss-cpu
