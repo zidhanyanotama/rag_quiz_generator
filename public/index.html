@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generator Soal Cerdas RAG | AI Exam Builder</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,9 +15,6 @@
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- HTML2PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -42,8 +39,23 @@
             }
         }
     </script>
-
-    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
 
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white antialiased">
@@ -70,120 +82,85 @@
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Main Content Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-            <!-- LEFT -->
+            <!-- Left Column: Input Form and Parameters (5 Cols on large screen) -->
             <div class="lg:col-span-5 space-y-6">
                 <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
 
-                    <!-- Document Uploads -->
+                    <!-- Section: Document Uploads -->
                     <div>
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-                                <i class="fa-regular fa-folder-open text-indigo-500"></i>
-                                Sumber Dokumen
+                                <i class="fa-regular fa-folder-open text-indigo-500"></i> Sumber Dokumen
                             </h2>
                             <span class="text-xs text-slate-400">Format: .PDF</span>
                         </div>
 
                         <div class="space-y-3">
-
-                            <!-- RPS -->
+                            <!-- RPS Upload Dropzone -->
                             <div class="relative">
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">
-                                    Rencana Pembelajaran Semester (RPS)
-                                    <span class="text-rose-500">*</span>
-                                </label>
-
-                                <div id="rps_dropzone"
-                                    class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl p-3.5 transition-all cursor-pointer bg-slate-50/50 hover:bg-indigo-50/30 flex items-center justify-between">
-
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Rencana Pembelajaran Semester (RPS) <span class="text-rose-500">*</span></label>
+                                <div id="rps_dropzone" class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl p-3.5 transition-all cursor-pointer bg-slate-50/50 hover:bg-indigo-50/30 flex items-center justify-between">
                                     <div class="flex items-center gap-3 overflow-hidden">
                                         <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
                                             <i class="fa-regular fa-file-lines"></i>
                                         </div>
-
                                         <div class="truncate">
-                                            <p id="rps_filename" class="text-xs font-medium text-slate-700 truncate">
-                                                Pilih berkas RPS (.pdf)
-                                            </p>
-                                            <p id="rps_filesize" class="text-[10px] text-slate-400">
-                                                Klik untuk menjelajah file
-                                            </p>
+                                            <p id="rps_filename" class="text-xs font-medium text-slate-700 truncate">Pilih berkas RPS (.pdf)</p>
+                                            <p id="rps_filesize" class="text-[10px] text-slate-400">Klik untuk menjelajah file</p>
                                         </div>
                                     </div>
-
-                                    <button type="button" id="rps_clear"
-                                        class="hidden text-slate-400 hover:text-rose-500 p-1">
+                                    <button type="button" id="rps_clear" class="hidden text-slate-400 hover:text-rose-500 p-1">
                                         <i class="fa-solid fa-xmark text-sm"></i>
                                     </button>
                                 </div>
-
                                 <input type="file" id="rps" accept=".pdf" class="hidden" required>
                             </div>
 
-                            <!-- Modul -->
+                            <!-- Modul Upload Dropzone -->
                             <div class="relative">
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">
-                                    Modul / Materi Ajar
-                                    <span class="text-rose-500">*</span>
-                                </label>
-
-                                <div id="modul_dropzone"
-                                    class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl p-3.5 transition-all cursor-pointer bg-slate-50/50 hover:bg-indigo-50/30 flex items-center justify-between">
-
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Modul / Materi Ajar <span class="text-rose-500">*</span></label>
+                                <div id="modul_dropzone" class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl p-3.5 transition-all cursor-pointer bg-slate-50/50 hover:bg-indigo-50/30 flex items-center justify-between">
                                     <div class="flex items-center gap-3 overflow-hidden">
                                         <div class="w-9 h-9 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center shrink-0">
                                             <i class="fa-regular fa-file-pdf"></i>
                                         </div>
-
                                         <div class="truncate">
-                                            <p id="modul_filename" class="text-xs font-medium text-slate-700 truncate">
-                                                Pilih berkas Modul (.pdf)
-                                            </p>
-                                            <p id="modul_filesize" class="text-[10px] text-slate-400">
-                                                Klik untuk menjelajah file
-                                            </p>
+                                            <p id="modul_filename" class="text-xs font-medium text-slate-700 truncate">Pilih berkas Modul (.pdf)</p>
+                                            <p id="modul_filesize" class="text-[10px] text-slate-400">Klik untuk menjelajah file</p>
                                         </div>
                                     </div>
-
-                                    <button type="button" id="modul_clear"
-                                        class="hidden text-slate-400 hover:text-rose-500 p-1">
+                                    <button type="button" id="modul_clear" class="hidden text-slate-400 hover:text-rose-500 p-1">
                                         <i class="fa-solid fa-xmark text-sm"></i>
                                     </button>
                                 </div>
-
                                 <input type="file" id="modul" accept=".pdf" class="hidden" required>
                             </div>
-
                         </div>
                     </div>
 
+                    <!-- Divider -->
                     <div class="border-t border-slate-100"></div>
 
-                    <!-- Parameters -->
+                    <!-- Section: Question Parameters -->
                     <div>
                         <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700 mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-sliders text-indigo-500"></i>
-                            Parameter Soal
+                            <i class="fa-solid fa-sliders text-indigo-500"></i> Parameter Soal
                         </h2>
 
                         <div class="space-y-4">
-
-                            <!-- Topic -->
+                            <!-- Topic Input -->
                             <div>
                                 <label for="topic" class="block text-xs font-semibold text-slate-700 mb-1">
-                                    Topik Bahasan
-                                    <span class="text-rose-500">*</span>
+                                    Topik Bahasan <span class="text-rose-500">*</span>
                                 </label>
-
                                 <div class="relative">
                                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                                     </span>
-
                                     <input
                                         type="text"
                                         id="topic"
@@ -194,20 +171,16 @@
                                 </div>
                             </div>
 
-                            <!-- Number + Format -->
+                            <!-- Number of Questions and Format Grid -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
                                 <div>
                                     <label for="num_questions" class="block text-xs font-semibold text-slate-700 mb-1">
                                         Jumlah Soal
                                     </label>
-
                                     <div class="flex items-center border border-slate-200 rounded-xl bg-slate-50 overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500">
-                                        <button type="button" id="btn_minus"
-                                            class="px-3 py-2 text-slate-500 hover:bg-slate-200/60 active:scale-95 transition">
+                                        <button type="button" id="btn_minus" class="px-3 py-2 text-slate-500 hover:bg-slate-200/60 active:scale-95 transition">
                                             <i class="fa-solid fa-minus text-xs"></i>
                                         </button>
-
                                         <input
                                             type="number"
                                             id="num_questions"
@@ -217,9 +190,7 @@
                                             class="w-full text-center bg-transparent text-sm font-semibold focus:outline-none py-2"
                                             required
                                         >
-
-                                        <button type="button" id="btn_plus"
-                                            class="px-3 py-2 text-slate-500 hover:bg-slate-200/60 active:scale-95 transition">
+                                        <button type="button" id="btn_plus" class="px-3 py-2 text-slate-500 hover:bg-slate-200/60 active:scale-95 transition">
                                             <i class="fa-solid fa-plus text-xs"></i>
                                         </button>
                                     </div>
@@ -229,69 +200,50 @@
                                     <label for="question_format" class="block text-xs font-semibold text-slate-700 mb-1">
                                         Format Soal
                                     </label>
-
                                     <div class="relative">
-                                        <select id="question_format"
-                                            class="w-full appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition cursor-pointer">
-
+                                        <select id="question_format" class="w-full appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition cursor-pointer">
                                             <option value="Pilihan Ganda">Pilihan Ganda (PG)</option>
                                             <option value="Esai">Esai / Uraian</option>
                                         </select>
-
                                         <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
                                             <i class="fa-solid fa-chevron-down"></i>
                                         </span>
                                     </div>
                                 </div>
-
                             </div>
 
-                            <!-- Bloom -->
+                            <!-- Bloom's Taxonomy Level -->
                             <div>
                                 <label for="bloom_level" class="block text-xs font-semibold text-slate-700 mb-1">
                                     Tingkat Kesulitan (Taksonomi Bloom)
                                 </label>
-
                                 <div class="relative">
-                                    <select id="bloom_level"
-                                        class="w-full appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition cursor-pointer">
-
-                                        <option value="Mudah (C1-C2)">
-                                            🟢 Mudah (C1 Mengingat, C2 Memahami)
-                                        </option>
-
-                                        <option value="Sedang (C3-C4)">
-                                            🟡 Sedang (C3 Menerapkan, C4 Menganalisis)
-                                        </option>
-
-                                        <option value="Sukar (C5-C6)">
-                                            🔴 Sukar (C5 Mengevaluasi, C6 Mencipta)
-                                        </option>
+                                    <select id="bloom_level" class="w-full appearance-none pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition cursor-pointer">
+                                        <option value="Mudah (C1-C2)">🟢 Mudah (C1 Mengingat, C2 Memahami)</option>
+                                        <option value="Sedang (C3-C4)">🟡 Sedang (C3 Menerapkan, C4 Menganalisis)</option>
+                                        <option value="Sukar (C5-C6)">🔴 Sukar (C5 Mengevaluasi, C6 Mencipta)</option>
                                     </select>
-
                                     <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
                                         <i class="fa-solid fa-chevron-down"></i>
                                     </span>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
-                    <!-- Generate -->
+                    <!-- Action Button -->
                     <button
                         id="generateButton"
-                        class="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.99] shadow-md shadow-indigo-200 hover:shadow-indigo-300 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
-
+                        class="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.99] shadow-md shadow-indigo-200 hover:shadow-indigo-300 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
                         <i id="btnIcon" class="fa-solid fa-wand-magic-sparkles"></i>
                         <span id="btnText">Generate Soal Cerdas</span>
                     </button>
 
-                    <!-- Status -->
+                    <!-- Feedback Notification Box -->
                     <div id="statusContainer" class="hidden rounded-xl p-3 text-xs transition-all">
                         <div class="flex items-start gap-2.5">
                             <span id="statusIcon" class="shrink-0 mt-0.5"></span>
-
                             <div class="flex-1">
                                 <p id="status" class="font-medium leading-relaxed"></p>
                             </div>
@@ -301,127 +253,74 @@
                 </div>
             </div>
 
-            <!-- RIGHT -->
+            <!-- Right Column: Result Panel (7 Cols on large screen) -->
             <div class="lg:col-span-7">
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[580px]">
 
-                    <!-- Result Header -->
+                    <!-- Result Panel Header -->
                     <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
-
                         <div class="flex items-center gap-2">
-                            <h2 class="text-sm font-bold text-slate-800">
-                                Hasil Pembuatan Soal
-                            </h2>
-
-                            <span id="resultBadge"
-                                class="hidden px-2 py-0.5 text-[11px] font-semibold rounded-md bg-slate-100 text-slate-600">
-                                Generated
-                            </span>
+                            <h2 class="text-sm font-bold text-slate-800">Hasil Pembuatan Soal</h2>
+                            <span id="resultBadge" class="hidden px-2 py-0.5 text-[11px] font-semibold rounded-md bg-slate-100 text-slate-600">Generated</span>
                         </div>
 
+                        <!-- Actions (Copy, Download, Clear) -->
                         <div class="flex items-center gap-1.5" id="outputActions">
-
-                            <button id="copyBtn"
-                                title="Salin ke Clipboard"
-                                class="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition border border-slate-200 flex items-center gap-1.5 active:scale-95 disabled:opacity-40">
-
+                            <button id="copyBtn" title="Salin ke Clipboard" class="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition border border-slate-200 flex items-center gap-1.5 active:scale-95 disabled:opacity-40">
                                 <i class="fa-regular fa-copy"></i>
                                 <span>Salin</span>
                             </button>
-
-                            <button id="downloadBtn"
-                                title="Unduh TXT"
-                                class="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition border border-slate-200 flex items-center gap-1.5 active:scale-95 disabled:opacity-40">
-
-                                <i class="fa-solid fa-file-lines"></i>
-                                <span>TXT</span>
+                            <button id="downloadBtn" title="Unduh Hasil" class="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition border border-slate-200 flex items-center gap-1.5 active:scale-95 disabled:opacity-40">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Download</span>
                             </button>
-
-                            <button id="pdfBtn"
-                                title="Unduh PDF"
-                                class="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition border border-slate-200 flex items-center gap-1.5 active:scale-95 disabled:opacity-40">
-
-                                <i class="fa-solid fa-file-pdf"></i>
-                                <span>PDF</span>
-                            </button>
-
-                            <button id="clearBtn"
-                                title="Bersihkan Layar"
-                                class="p-1.5 text-xs text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition active:scale-95">
-
+                            <button id="clearBtn" title="Bersihkan Layar" class="p-1.5 text-xs text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition active:scale-95">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
-
                         </div>
                     </div>
 
-                    <!-- Result Content -->
+                    <!-- Result Panel Content Area -->
                     <div class="relative flex-1 p-5 flex flex-col bg-slate-900/5">
 
-                        <!-- Empty -->
-                        <div id="emptyState"
-                            class="my-auto py-12 flex flex-col items-center justify-center text-center px-4">
-
+                        <!-- Empty State View -->
+                        <div id="emptyState" class="my-auto py-12 flex flex-col items-center justify-center text-center px-4">
                             <div class="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 mb-4 shadow-inner">
                                 <i class="fa-solid fa-file-circle-question text-2xl"></i>
                             </div>
-
-                            <h3 class="text-base font-bold text-slate-700 mb-1">
-                                Belum Ada Soal Yang Dibuat
-                            </h3>
-
+                            <h3 class="text-base font-bold text-slate-700 mb-1">Belum Ada Soal Yang Dibuat</h3>
                             <p class="text-xs text-slate-500 max-w-sm mb-4">
                                 Unggah dokumen RPS dan Modul kuliah, tentukan parameter topik serta tingkat Bloom, lalu klik "Generate Soal Cerdas".
                             </p>
-
                             <div class="inline-flex items-center gap-2 text-[11px] text-slate-400 bg-white/70 px-3 py-1.5 rounded-full border border-slate-200">
-                                <i class="fa-solid fa-shield-halved text-indigo-400"></i>
-                                Terverifikasi langsung berbasis dokumen RAG
+                                <i class="fa-solid fa-shield-halved text-indigo-400"></i> Terverifikasi langsung berbasis dokumen RAG
                             </div>
                         </div>
 
-                        <!-- Loading -->
-                        <div id="loadingState"
-                            class="hidden my-auto py-12 flex flex-col items-center justify-center text-center px-4">
-
+                        <!-- Loading State View -->
+                        <div id="loadingState" class="hidden my-auto py-12 flex flex-col items-center justify-center text-center px-4">
                             <div class="relative mb-5">
                                 <div class="w-16 h-16 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin"></div>
-
                                 <div class="absolute inset-0 flex items-center justify-center text-indigo-600">
                                     <i class="fa-solid fa-microchip text-xl"></i>
                                 </div>
                             </div>
+                            <h4 id="loadingStepTitle" class="text-sm font-bold text-slate-800 mb-1">Menganalisis Dokumen...</h4>
+                            <p id="loadingStepDesc" class="text-xs text-slate-500 max-w-xs mb-4">Mengekstrak RPS dan Modul ajar ke dalam representasi vektor.</p>
 
-                            <h4 id="loadingStepTitle"
-                                class="text-sm font-bold text-slate-800 mb-1">
-                                Menganalisis Dokumen...
-                            </h4>
-
-                            <p id="loadingStepDesc"
-                                class="text-xs text-slate-500 max-w-xs mb-4">
-                                Mengekstrak RPS dan Modul ajar ke dalam representasi vektor.
-                            </p>
-
+                            <!-- 2-step progress visual -->
                             <div class="w-full max-w-xs bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                                <div id="progressBar"
-                                    class="bg-indigo-600 h-full w-1/4 transition-all duration-500">
-                                </div>
+                                <div id="progressBar" class="bg-indigo-600 h-full w-1/4 transition-all duration-500"></div>
                             </div>
                         </div>
 
-                        <!-- CLEAN RESULT -->
-                        <div id="resultWrapper"
-                            class="hidden flex-1 flex flex-col">
-
-                            <div id="result"
-                                class="result-document flex-1 w-full bg-white p-6 rounded-xl border border-slate-200 overflow-y-auto select-text selection:bg-indigo-500 selection:text-white shadow-sm">
-                            </div>
-
+                        <!-- Result Pre Tag with Clean Styled Monospace/Readable Font -->
+                        <div id="resultWrapper" class="hidden flex-1 flex flex-col">
+                            <pre id="result" class="flex-1 w-full bg-white p-5 rounded-xl border border-slate-200 text-xs sm:text-sm font-mono text-slate-800 leading-relaxed overflow-x-auto whitespace-pre-wrap select-text selection:bg-indigo-500 selection:text-white shadow-sm"></pre>
                         </div>
-
                     </div>
 
-                    <!-- Footer -->
+                    <!-- Footer of Result Panel -->
                     <div class="px-5 py-2.5 bg-slate-50/80 border-t border-slate-200 text-[11px] text-slate-500 flex items-center justify-between">
                         <span id="charCount">0 Karakter</span>
                         <span>Retrieval-Augmented Generation</span>
@@ -433,7 +332,313 @@
         </div>
     </main>
 
-    <script src="/script.js"></script>
+    <script>
+        // DOM Elements
+        const generateButton = document.getElementById("generateButton");
+        const btnText = document.getElementById("btnText");
+        const btnIcon = document.getElementById("btnIcon");
 
+        const rpsInput = document.getElementById("rps");
+        const modulInput = document.getElementById("modul");
+        const rpsDropzone = document.getElementById("rps_dropzone");
+        const modulDropzone = document.getElementById("modul_dropzone");
+        const rpsFilename = document.getElementById("rps_filename");
+        const modulFilename = document.getElementById("modul_filename");
+        const rpsFilesize = document.getElementById("rps_filesize");
+        const modulFilesize = document.getElementById("modul_filesize");
+        const rpsClear = document.getElementById("rps_clear");
+        const modulClear = document.getElementById("modul_clear");
+
+        const topicInput = document.getElementById("topic");
+        const numQuestionsInput = document.getElementById("num_questions");
+        const questionFormatInput = document.getElementById("question_format");
+        const bloomLevelInput = document.getElementById("bloom_level");
+
+        const statusContainer = document.getElementById("statusContainer");
+        const statusElement = document.getElementById("status");
+        const statusIcon = document.getElementById("statusIcon");
+
+        const emptyState = document.getElementById("emptyState");
+        const loadingState = document.getElementById("loadingState");
+        const loadingStepTitle = document.getElementById("loadingStepTitle");
+        const loadingStepDesc = document.getElementById("loadingStepDesc");
+        const progressBar = document.getElementById("progressBar");
+        const resultWrapper = document.getElementById("resultWrapper");
+        const resultElement = document.getElementById("result");
+        const resultBadge = document.getElementById("resultBadge");
+        const charCount = document.getElementById("charCount");
+
+        const copyBtn = document.getElementById("copyBtn");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const clearBtn = document.getElementById("clearBtn");
+
+        const btnMinus = document.getElementById("btn_minus");
+        const btnPlus = document.getElementById("btn_plus");
+
+        // Format File Size Helper
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Dropzone interactions
+        function setupDropzone(dropzone, input, nameEl, sizeEl, clearBtn) {
+            dropzone.addEventListener("click", () => input.click());
+
+            input.addEventListener("change", function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    nameEl.textContent = file.name;
+                    nameEl.classList.add("text-indigo-700", "font-semibold");
+                    sizeEl.textContent = formatBytes(file.size);
+                    clearBtn.classList.remove("hidden");
+                    dropzone.classList.add("border-indigo-400", "bg-indigo-50/20");
+                }
+            });
+
+            clearBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                input.value = "";
+                nameEl.textContent = input.id === "rps" ? "Pilih berkas RPS (.pdf)" : "Pilih berkas Modul (.pdf)";
+                nameEl.classList.remove("text-indigo-700", "font-semibold");
+                sizeEl.textContent = "Klik untuk menjelajah file";
+                clearBtn.classList.add("hidden");
+                dropzone.classList.remove("border-indigo-400", "bg-indigo-50/20");
+            });
+
+            // Drag and drop events
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.add('border-indigo-500', 'bg-indigo-50/50');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.remove('border-indigo-500', 'bg-indigo-50/50');
+                });
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    if (files[0].name.toLowerCase().endsWith('.pdf')) {
+                        input.files = files;
+                        const event = new Event('change');
+                        input.dispatchEvent(event);
+                    } else {
+                        showNotification("Hanya berkas format .PDF yang didukung.", "warning");
+                    }
+                }
+            });
+        }
+
+        setupDropzone(rpsDropzone, rpsInput, rpsFilename, rpsFilesize, rpsClear);
+        setupDropzone(modulDropzone, modulInput, modulFilename, modulFilesize, modulClear);
+
+        // Counter Stepper for num_questions
+        btnMinus.addEventListener("click", () => {
+            let val = parseInt(numQuestionsInput.value) || 1;
+            if (val > 1) numQuestionsInput.value = val - 1;
+        });
+
+        btnPlus.addEventListener("click", () => {
+            let val = parseInt(numQuestionsInput.value) || 1;
+            if (val < 50) numQuestionsInput.value = val + 1;
+        });
+
+        // Notifications UI Handler
+        function showNotification(message, type = "info") {
+            statusContainer.classList.remove("hidden", "bg-emerald-50", "border-emerald-200", "text-emerald-800", "bg-rose-50", "border-rose-200", "text-rose-800", "bg-amber-50", "border-amber-200", "text-amber-800", "bg-indigo-50", "border-indigo-200", "text-indigo-800");
+
+            if (type === "success") {
+                statusContainer.classList.add("bg-emerald-50", "border", "border-emerald-200", "text-emerald-800");
+                statusIcon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i>';
+            } else if (type === "error") {
+                statusContainer.classList.add("bg-rose-50", "border", "border-rose-200", "text-rose-800");
+                statusIcon.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-600"></i>';
+            } else if (type === "warning") {
+                statusContainer.classList.add("bg-amber-50", "border", "border-amber-200", "text-amber-800");
+                statusIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600"></i>';
+            } else {
+                statusContainer.classList.add("bg-indigo-50", "border", "border-indigo-200", "text-indigo-800");
+                statusIcon.innerHTML = '<i class="fa-solid fa-circle-info text-indigo-600"></i>';
+            }
+
+            statusElement.textContent = message;
+        }
+
+        generateButton.addEventListener("click", async function() {
+            const rps = rpsInput.files[0];
+            const modul = modulInput.files[0];
+            const topic = topicInput.value.trim();
+            const numQuestions = numQuestionsInput.value;
+            const questionFormat = questionFormatInput.value;
+            const bloomLevel = bloomLevelInput.value;
+
+            // Validasi file dan topik
+            if (!rps || !modul) {
+                showNotification("Harap upload dokumen RPS dan Modul terlebih dahulu.", "warning");
+                return;
+            }
+
+            if (!topic) {
+                showNotification("Harap masukkan topik bahasan soal.", "warning");
+                topicInput.focus();
+                return;
+            }
+
+            // Atur status UI ke loading
+            generateButton.disabled = true;
+            btnText.textContent = "Memproses RAG...";
+            btnIcon.className = "fa-solid fa-spinner fa-spin";
+
+            emptyState.classList.add("hidden");
+            resultWrapper.classList.add("hidden");
+            loadingState.classList.remove("hidden");
+            resultBadge.classList.add("hidden");
+
+            try {
+                // ==================================================
+                // TAHAP 1: PROSES DOKUMEN
+                // ==================================================
+                loadingStepTitle.textContent = "Tahap 1: Memproses Dokumen RPS & Modul...";
+                loadingStepDesc.textContent = "Membaca teks PDF, melakukan chunking, dan membangun basis pengetahuan dokumen.";
+                progressBar.style.width = "45%";
+                showNotification("Sedang memproses RPS dan Modul...", "info");
+
+                const processData = new FormData();
+                processData.append("rps", rps);
+                processData.append("modul", modul);
+
+                const processResponse = await fetch("/process", {
+                    method: "POST",
+                    body: processData
+                });
+
+                const processResult = await processResponse.text();
+
+                if (!processResponse.ok) {
+                    throw new Error(processResult || "Gagal memproses dokumen pada server.");
+                }
+
+                // ==================================================
+                // TAHAP 2: GENERATE SOAL
+                // ==================================================
+                loadingStepTitle.textContent = "Tahap 2: Mensintesis Soal Cerdas...";
+                loadingStepDesc.textContent = `Mengambil konteks dokumen yang relevan untuk topik "${topic}" (${bloomLevel})...`;
+                progressBar.style.width = "85%";
+                showNotification("Dokumen berhasil diproses. Sedang membuat soal...", "info");
+
+                const generateData = new FormData();
+                generateData.append("topic", topic);
+                generateData.append("num_questions", numQuestions);
+                generateData.append("question_format", questionFormat);
+                generateData.append("bloom_level", bloomLevel);
+
+                const generateResponse = await fetch("/generate", {
+                    method: "POST",
+                    body: generateData
+                });
+
+                const generateResult = await generateResponse.text();
+
+                if (!generateResponse.ok) {
+                    throw new Error(generateResult || "Gagal membuat soal pada server.");
+                }
+
+                // ==================================================
+                // TAMPILKAN HASIL SUKSES
+                // ==================================================
+                progressBar.style.width = "100%";
+                loadingState.classList.add("hidden");
+                resultWrapper.classList.remove("hidden");
+                resultBadge.classList.remove("hidden");
+
+                resultElement.textContent = generateResult;
+                charCount.textContent = `${generateResult.length.toLocaleString()} Karakter`;
+                showNotification("Soal berhasil dibuat secara akurat berbasis dokumen.", "success");
+
+            } catch (error) {
+                loadingState.classList.add("hidden");
+                resultWrapper.classList.remove("hidden");
+
+                showNotification("Terjadi kesalahan saat memproses data.", "error");
+                resultElement.textContent = `[ERROR]: ${error.message}`;
+                charCount.textContent = `${resultElement.textContent.length} Karakter`;
+
+            } finally {
+                // Aktifkan kembali tombol
+                generateButton.disabled = false;
+                btnText.textContent = "Generate Soal Cerdas";
+                btnIcon.className = "fa-solid fa-wand-magic-sparkles";
+            }
+        });
+
+        // Copy to Clipboard (cross-browser execCommand fallback safe)
+        copyBtn.addEventListener("click", function() {
+            const text = resultElement.textContent;
+            if (!text) {
+                showNotification("Tidak ada konten untuk disalin.", "warning");
+                return;
+            }
+
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = text;
+            tempTextArea.style.position = "fixed";
+            tempTextArea.style.opacity = "0";
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+
+            try {
+                document.execCommand('copy');
+                const originalHtml = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fa-solid fa-check text-emerald-600"></i> <span class="text-emerald-600">Tersalin!</span>';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalHtml;
+                }, 2000);
+            } catch (err) {
+                showNotification("Gagal menyalin teks ke clipboard.", "error");
+            } finally {
+                document.body.removeChild(tempTextArea);
+            }
+        });
+
+        // Download as Text File
+        downloadBtn.addEventListener("click", function() {
+            const text = resultElement.textContent;
+            if (!text) {
+                showNotification("Belum ada soal untuk diunduh.", "warning");
+                return;
+            }
+
+            const topicSanitized = (topicInput.value || "soal_rag").trim().replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `soal_${topicSanitized}_${Date.now()}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        });
+
+        // Clear Result
+        clearBtn.addEventListener("click", function() {
+            resultElement.textContent = "";
+            resultWrapper.classList.add("hidden");
+            loadingState.classList.add("hidden");
+            emptyState.classList.remove("hidden");
+            resultBadge.classList.add("hidden");
+            charCount.textContent = "0 Karakter";
+            statusContainer.classList.add("hidden");
+        });
+    </script>
 </body>
 </html>
