@@ -475,111 +475,169 @@
         }
 
         generateButton.addEventListener("click", async function() {
-            const rps = rpsInput.files[0];
-            const modul = modulInput.files[0];
-            const topic = topicInput.value.trim();
-            const numQuestions = numQuestionsInput.value;
-            const questionFormat = questionFormatInput.value;
-            const bloomLevel = bloomLevelInput.value;
-
-            // Validasi file dan topik
-            if (!rps || !modul) {
-                showNotification("Harap upload dokumen RPS dan Modul terlebih dahulu.", "warning");
-                return;
+        const rps = rpsInput.files[0];
+        const modul = modulInput.files[0];
+        const topic = topicInput.value.trim();
+        const numQuestions = numQuestionsInput.value;
+        const questionFormat = questionFormatInput.value;
+        const bloomLevel = bloomLevelInput.value;
+    
+        // Validasi file dan topik
+        if (!rps || !modul) {
+            showNotification("Harap upload dokumen RPS dan Modul terlebih dahulu.", "warning");
+            return;
+        }
+    
+        if (!topic) {
+            showNotification("Harap masukkan topik bahasan soal.", "warning");
+            topicInput.focus();
+            return;
+        }
+    
+        // Atur status UI ke loading
+        generateButton.disabled = true;
+        btnText.textContent = "Memproses RAG...";
+        btnIcon.className = "fa-solid fa-spinner fa-spin";
+    
+        emptyState.classList.add("hidden");
+        resultWrapper.classList.add("hidden");
+        loadingState.classList.remove("hidden");
+        resultBadge.classList.add("hidden");
+    
+        try {
+            // ==================================================
+            // TAHAP 1: MULAI PROSES DOKUMEN
+            // ==================================================
+            loadingStepTitle.textContent = "Tahap 1: Memproses Dokumen RPS & Modul...";
+            loadingStepDesc.textContent = "Membaca PDF, melakukan chunking, dan membangun basis pengetahuan.";
+            progressBar.style.width = "25%";
+            showNotification("Sedang memproses RPS dan Modul...", "info");
+    
+            const processData = new FormData();
+            processData.append("rps", rps);
+            processData.append("modul", modul);
+    
+            const processResponse = await fetch("/process", {
+                method: "POST",
+                body: processData
+            });
+    
+            const processResult = await processResponse.text();
+    
+            if (!processResponse.ok) {
+                throw new Error(processResult || "Gagal memulai proses dokumen.");
             }
-
-            if (!topic) {
-                showNotification("Harap masukkan topik bahasan soal.", "warning");
-                topicInput.focus();
-                return;
-            }
-
-            // Atur status UI ke loading
-            generateButton.disabled = true;
-            btnText.textContent = "Memproses RAG...";
-            btnIcon.className = "fa-solid fa-spinner fa-spin";
-
-            emptyState.classList.add("hidden");
-            resultWrapper.classList.add("hidden");
-            loadingState.classList.remove("hidden");
-            resultBadge.classList.add("hidden");
-
-            try {
-                // ==================================================
-                // TAHAP 1: PROSES DOKUMEN
-                // ==================================================
-                loadingStepTitle.textContent = "Tahap 1: Memproses Dokumen RPS & Modul...";
-                loadingStepDesc.textContent = "Membaca teks PDF, melakukan chunking, dan membangun basis pengetahuan dokumen.";
-                progressBar.style.width = "45%";
-                showNotification("Sedang memproses RPS dan Modul...", "info");
-
-                const processData = new FormData();
-                processData.append("rps", rps);
-                processData.append("modul", modul);
-
-                const processResponse = await fetch("/process", {
-                    method: "POST",
-                    body: processData
-                });
-
-                const processResult = await processResponse.text();
-
-                if (!processResponse.ok) {
-                    throw new Error(processResult || "Gagal memproses dokumen pada server.");
+    
+            // ==================================================
+            // TAHAP 1B: CEK STATUS BACKGROUND PROCESS
+            // ==================================================
+            let processingFinished = false;
+    
+            while (!processingFinished) {
+    
+                await new Promise(resolve => setTimeout(resolve, 5000));
+    
+                const statusResponse = await fetch("/status");
+    
+                if (!statusResponse.ok) {
+                    throw new Error("Gagal membaca status proses dokumen.");
                 }
-
-                // ==================================================
-                // TAHAP 2: GENERATE SOAL
-                // ==================================================
-                loadingStepTitle.textContent = "Tahap 2: Mensintesis Soal Cerdas...";
-                loadingStepDesc.textContent = `Mengambil konteks dokumen yang relevan untuk topik "${topic}" (${bloomLevel})...`;
-                progressBar.style.width = "85%";
-                showNotification("Dokumen berhasil diproses. Sedang membuat soal...", "info");
-
-                const generateData = new FormData();
-                generateData.append("topic", topic);
-                generateData.append("num_questions", numQuestions);
-                generateData.append("question_format", questionFormat);
-                generateData.append("bloom_level", bloomLevel);
-
-                const generateResponse = await fetch("/generate", {
-                    method: "POST",
-                    body: generateData
-                });
-
-                const generateResult = await generateResponse.text();
-
-                if (!generateResponse.ok) {
-                    throw new Error(generateResult || "Gagal membuat soal pada server.");
+    
+                const statusData = await statusResponse.json();
+    
+                console.log("Status RAG:", statusData.status);
+    
+                if (statusData.status === "processing") {
+                    loadingStepTitle.textContent = "Tahap 1: Memproses Dokumen...";
+                    loadingStepDesc.textContent = "Embedding Gemini dan indexing FAISS sedang berjalan.";
+                    progressBar.style.width = "55%";
+                    showNotification("RAG masih memproses dokumen. Mohon tunggu...", "info");
+    
+                } else if (statusData.status === "completed") {
+    
+                    processingFinished = true;
+    
+                    loadingStepTitle.textContent = "Tahap 2: Mensintesis Soal Cerdas...";
+                    loadingStepDesc.textContent = `Mengambil konteks relevan untuk topik "${topic}" (${bloomLevel})...`;
+                    progressBar.style.width = "80%";
+    
+                    showNotification(
+                        "Dokumen berhasil diproses. Sedang membuat soal...",
+                        "info"
+                    );
+    
+                } else if (statusData.status === "error") {
+    
+                    throw new Error(
+                        statusData.result || "Terjadi kesalahan saat memproses dokumen."
+                    );
                 }
-
-                // ==================================================
-                // TAMPILKAN HASIL SUKSES
-                // ==================================================
-                progressBar.style.width = "100%";
-                loadingState.classList.add("hidden");
-                resultWrapper.classList.remove("hidden");
-                resultBadge.classList.remove("hidden");
-
-                resultElement.textContent = generateResult;
-                charCount.textContent = `${generateResult.length.toLocaleString()} Karakter`;
-                showNotification("Soal berhasil dibuat secara akurat berbasis dokumen.", "success");
-
-            } catch (error) {
-                loadingState.classList.add("hidden");
-                resultWrapper.classList.remove("hidden");
-
-                showNotification("Terjadi kesalahan saat memproses data.", "error");
-                resultElement.textContent = `[ERROR]: ${error.message}`;
-                charCount.textContent = `${resultElement.textContent.length} Karakter`;
-
-            } finally {
-                // Aktifkan kembali tombol
-                generateButton.disabled = false;
-                btnText.textContent = "Generate Soal Cerdas";
-                btnIcon.className = "fa-solid fa-wand-magic-sparkles";
             }
-        });
+    
+            // ==================================================
+            // TAHAP 2: GENERATE SOAL
+            // ==================================================
+            const generateData = new FormData();
+    
+            generateData.append("topic", topic);
+            generateData.append("num_questions", numQuestions);
+            generateData.append("question_format", questionFormat);
+            generateData.append("bloom_level", bloomLevel);
+    
+            const generateResponse = await fetch("/generate", {
+                method: "POST",
+                body: generateData
+            });
+    
+            const generateResult = await generateResponse.text();
+    
+            if (!generateResponse.ok) {
+                throw new Error(
+                    generateResult || "Gagal membuat soal pada server."
+                );
+            }
+    
+            // ==================================================
+            // TAMPILKAN HASIL SUKSES
+            // ==================================================
+            progressBar.style.width = "100%";
+    
+            loadingState.classList.add("hidden");
+            resultWrapper.classList.remove("hidden");
+            resultBadge.classList.remove("hidden");
+    
+            resultElement.textContent = generateResult;
+            charCount.textContent =
+                `${generateResult.length.toLocaleString()} Karakter`;
+    
+            showNotification(
+                "Soal berhasil dibuat secara akurat berbasis dokumen.",
+                "success"
+            );
+    
+        } catch (error) {
+    
+            loadingState.classList.add("hidden");
+            resultWrapper.classList.remove("hidden");
+    
+            showNotification(
+                "Terjadi kesalahan saat memproses data.",
+                "error"
+            );
+    
+            resultElement.textContent = `[ERROR]: ${error.message}`;
+    
+            charCount.textContent =
+                `${resultElement.textContent.length} Karakter`;
+    
+        } finally {
+    
+            generateButton.disabled = false;
+            btnText.textContent = "Generate Soal Cerdas";
+            btnIcon.className =
+                "fa-solid fa-wand-magic-sparkles";
+        }
+    });
 
         // Copy to Clipboard (cross-browser execCommand fallback safe)
         copyBtn.addEventListener("click", function() {
