@@ -1,6 +1,7 @@
 import os
 import re
 import pdfplumber
+import threading
 import time
 from flask import Flask, request, send_from_directory
 from google import genai
@@ -81,6 +82,8 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 # ==============================================================================
 vector_store = None
 embedding_model = None
+processing_status = "idle"
+processing_result = ""
 
 # ==============================================================================
 # TAHAP 1: DATA INGESTION & DATA CLEANING
@@ -381,15 +384,55 @@ def generate_quiz(topic_query, num_questions, question_format, bloom_level):
 
 @app.route("/process", methods=["POST"])
 def process():
+    global processing_status, processing_result
+
     rps_file = request.files.get("rps")
     modul_file = request.files.get("modul")
 
-    result = process_pdf_files(
-        rps_file,
-        modul_file
-    )
+    if not rps_file or not modul_file:
+        return "RPS dan Modul wajib diupload.", 400
 
-    return result
+    if processing_status == "processing":
+        return "Proses sebelumnya masih berjalan.", 409
+
+    # Simpan isi file ke memory sebelum background thread dimulai
+    rps_data = rps_file.read()
+    modul_data = modul_file.read()
+
+    processing_status = "processing"
+    processing_result = ""
+
+    def background_process():
+        global processing_status, processing_result
+
+        try:
+            from io import BytesIO
+
+            rps_copy = BytesIO(rps_data)
+            modul_copy = BytesIO(modul_data)
+
+            processing_result = process_pdf_files(
+                rps_copy,
+                modul_copy
+            )
+
+            processing_status = "completed"
+
+        except Exception as e:
+            processing_result = str(e)
+            processing_status = "error"
+
+    thread = threading.Thread(target=background_process)
+    thread.start()
+
+    return "processing", 202
+
+@app.route("/status", methods=["GET"])
+def status():
+    return {
+        "status": processing_status,
+        "result": processing_result
+    }
 
 @app.route("/generate", methods=["POST"])
 def generate():
