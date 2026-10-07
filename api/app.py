@@ -404,20 +404,23 @@ def process():
 
     def background_process():
         global processing_status, processing_result
-
+    
         try:
             from io import BytesIO
-
+    
             rps_copy = BytesIO(rps_data)
             modul_copy = BytesIO(modul_data)
-
+    
+            rps_copy.filename = "RPS.pdf"
+            modul_copy.filename = "Modul.pdf"
+    
             processing_result = process_pdf_files(
                 rps_copy,
                 modul_copy
             )
-
+    
             processing_status = "completed"
-
+    
         except Exception as e:
             processing_result = str(e)
             processing_status = "error"
