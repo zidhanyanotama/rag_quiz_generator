@@ -185,23 +185,10 @@ def generate_quiz(topic_query, num_questions, question_format, bloom_level):
     except Exception as e:
         return f"Error konfigurasi Gemini API Client: {str(e)}"
 
-    # 2. DETEKSI OTOMATIS MODEL GEMINI YANG AKTIF
-    active_models = []
-    try:
-        for m in client.models.list():
-            model_id = m.name.replace("models/", "") if hasattr(m, 'name') else str(m)
-            if "gemini" in model_id.lower():
-                supported_methods = getattr(m, 'supported_generation_methods', [])
-                if not supported_methods or "generateContent" in supported_methods:
-                    active_models.append(model_id)
+    # 2. DETEKSI OTOMATIS MODEL GEMINI YANG AKTIF#
+    active_models = ["gemini-3.8-flash","gemini-3.7-flash","gemini-3.6-flash"]
 
-        print(f"Model aktif terdeteksi di API Key Anda: {active_models}")
-    except Exception as e:
-        print(f"Gagal melakukan auto-detect models, menggunakan fallback manual: {str(e)}")
-        active_models = ['gemini-2.0-flash', 'gemini-1.5-flash-002', 'gemini-1.5-flash']
-
-    if not active_models:
-        active_models = ['gemini-2.0-flash', 'gemini-1.5-flash-002', 'gemini-1.5-flash']
+    print(f"Model generasi yang akan dicoba: {active_models}")
 
     # TAHAP 4: RETRIEVAL COMPONENT (Search Cosine Similarity)
     retrieved_docs = vector_store.similarity_search(topic_query, k=5)
