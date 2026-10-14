@@ -198,7 +198,10 @@ def generate_quiz(topic_query, num_questions, question_format, bloom_level):
         return f"Error konfigurasi Gemini API Client: {str(e)}"
 
     # 2. DETEKSI OTOMATIS MODEL GEMINI YANG AKTIF#
-    active_models = ["gemini-3.8-flash","gemini-3.7-flash","gemini-3.6-flash"]
+    active_models = ["gemini-3.8-flash",
+                     "gemini-3.7-flash",
+                     "gemini-3.6-flash",
+                     "gemini-3.5-flash-lite"]
 
     print(f"Model generasi yang akan dicoba: {active_models}")
 
