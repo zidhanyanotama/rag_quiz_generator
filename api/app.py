@@ -4,6 +4,7 @@ import pdfplumber
 import threading
 import time
 from flask import Flask, request, send_from_directory
+from flask_cors import CORS
 from google import genai
 from google.genai import types
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -59,6 +60,17 @@ class GeminiEmbeddings:
 
 
 app = Flask(__name__)
+
+CORS(
+    app,
+    resources={
+        r"/*": {
+            "origins": [
+                "https://rag-quiz-generator-weld.vercel.app"
+            ]
+        }
+    }
+)
 
 @app.route("/")
 def home():
