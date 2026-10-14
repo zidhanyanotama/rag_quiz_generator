@@ -3,6 +3,7 @@ import re
 import pdfplumber
 import threading
 import time
+import hashlib
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from google import genai
@@ -96,6 +97,15 @@ vector_store = None
 embedding_model = None
 processing_status = "idle"
 processing_result = ""
+cached_document_hash = None
+
+def get_document_hash(rps_data, modul_data):
+    hasher = hashlib.sha256()
+    hasher.update(len(rps_data).to_bytes(8, "big"))
+    hasher.update(rps_data)
+    hasher.update(len(modul_data).to_bytes(8, "big"))
+    hasher.update(modul_data)
+    return hasher.hexdigest()
 
 # ==============================================================================
 # TAHAP 1: DATA INGESTION & DATA CLEANING
@@ -386,7 +396,7 @@ def generate_quiz(topic_query, num_questions, question_format, bloom_level):
 
 @app.route("/process", methods=["POST"])
 def process():
-    global processing_status, processing_result
+    global processing_status, processing_result, cached_document_hash
 
     rps_file = request.files.get("rps")
     modul_file = request.files.get("modul")
@@ -401,11 +411,18 @@ def process():
     rps_data = rps_file.read()
     modul_data = modul_file.read()
 
+    current_hash = get_document_hash(rps_data, modul_data)
+    
+    if vector_store is not None and current_hash == cached_document_hash:
+        processing_status = "completed"
+        processing_result = "Dokumen sama. Menggunakan kembali hasil RAG sebelumnya."
+        return processing_result, 200
+
     processing_status = "processing"
     processing_result = ""
 
     def background_process():
-        global processing_status, processing_result
+        global processing_status, processing_result, cached_document_hash
     
         try:
             from io import BytesIO
@@ -420,6 +437,9 @@ def process():
                 rps_copy,
                 modul_copy
             )
+
+            if vector_store is not None:
+                cached_document_hash = current_hash
     
             processing_status = "completed"
     
