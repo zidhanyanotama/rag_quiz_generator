@@ -333,6 +333,7 @@
     </main>
 
     <script>
+        const API_BASE_URL = "https://ragquizgenerator-production.up.railway.app";
         // DOM Elements
         const generateButton = document.getElementById("generateButton");
         const btnText = document.getElementById("btnText");
@@ -517,7 +518,7 @@
             processData.append("rps", rps);
             processData.append("modul", modul);
     
-            const processResponse = await fetch("/process", {
+            const processResponse = await fetch(`${API_BASE_URL}/process`, {
                 method: "POST",
                 body: processData
             });
@@ -537,7 +538,7 @@
     
                 await new Promise(resolve => setTimeout(resolve, 5000));
     
-                const statusResponse = await fetch("/status");
+                const statusResponse = await fetch(`${API_BASE_URL}/status`);
     
                 if (!statusResponse.ok) {
                     throw new Error("Gagal membaca status proses dokumen.");
@@ -584,7 +585,7 @@
             generateData.append("question_format", questionFormat);
             generateData.append("bloom_level", bloomLevel);
     
-            const generateResponse = await fetch("/generate", {
+            const generateResponse = await fetch(`${API_BASE_URL}/generate`, {
                 method: "POST",
                 body: generateData
             });
