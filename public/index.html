@@ -585,18 +585,57 @@
             generateData.append("question_format", questionFormat);
             generateData.append("bloom_level", bloomLevel);
     
+            
             const generateResponse = await fetch(`${API_BASE_URL}/generate`, {
                 method: "POST",
                 body: generateData
             });
-    
-            const generateResult = await generateResponse.text();
-    
+            
             if (!generateResponse.ok) {
-                throw new Error(
-                    generateResult || "Gagal membuat soal pada server."
-                );
+                const errorText = await generateResponse.text();
+                throw new Error(errorText || "Gagal memulai generasi soal.");
             }
+            
+            const startData = await generateResponse.json();
+            
+            if (startData.status !== "processing") {
+                throw new Error(startData.error || "Gagal memulai generasi soal.");
+            }
+            
+            loadingStepTitle.textContent = "Tahap 2: Membuat Soal...";
+            loadingStepDesc.textContent = "Gemini sedang menyusun soal. Mohon tunggu.";
+            
+            let generateResult = "";
+            
+            while (true) {
+                await new Promise(resolve => setTimeout(resolve, 3000));
+            
+                const statusResponse = await fetch(
+                    `${API_BASE_URL}/generate-status`,
+                    { cache: "no-store" }
+                );
+            
+                if (!statusResponse.ok) {
+                    throw new Error("Gagal memeriksa status generasi soal.");
+                }
+            
+                const statusData = await statusResponse.json();
+            
+                console.log("Status generasi soal:", statusData.status);
+            
+                if (statusData.status === "completed") {
+                    generateResult = statusData.result;
+                    break;
+                }
+            
+                if (statusData.status === "error") {
+                    throw new Error(statusData.result || "Generasi soal gagal.");
+                }
+            
+                loadingStepDesc.textContent =
+                    "Gemini masih bekerja menyusun soal. Mohon tunggu...";
+            }
+
     
             // ==================================================
             // TAMPILKAN HASIL SUKSES
