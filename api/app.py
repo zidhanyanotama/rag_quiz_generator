@@ -97,6 +97,8 @@ vector_store = None
 embedding_model = None
 processing_status = "idle"
 processing_result = ""
+generation_status = "idle"
+generation_result = ""
 cached_document_hash = None
 
 def get_document_hash(rps_data, modul_data):
@@ -461,20 +463,49 @@ def status():
 
 @app.route("/generate", methods=["POST"])
 def generate():
+    global generation_status, generation_result
 
     topic_query = request.form.get("topic")
     num_questions = request.form.get("num_questions", type=int)
     question_format = request.form.get("question_format")
     bloom_level = request.form.get("bloom_level")
 
-    result = generate_quiz(
-        topic_query,
-        num_questions,
-        question_format,
-        bloom_level
-    )
+    if vector_store is None:
+        return {"error": "Dokumen RAG belum siap."}, 400
 
-    return result
+    if not topic_query or not num_questions:
+        return {"error": "Topik dan jumlah soal wajib diisi."}, 400
+
+    if generation_status == "processing":
+        return {"error": "Generasi soal sebelumnya masih berjalan."}, 409
+
+    generation_status = "processing"
+    generation_result = ""
+
+    def background_generate():
+        global generation_status, generation_result
+        try:
+            generation_result = generate_quiz(
+                topic_query,
+                num_questions,
+                question_format,
+                bloom_level
+            )
+            generation_status = "completed"
+        except Exception as e:
+            generation_result = f"Gagal membuat soal: {str(e)}"
+            generation_status = "error"
+
+    threading.Thread(target=background_generate, daemon=True).start()
+    return {"status": "processing"}, 202
+
+
+@app.route("/generate-status", methods=["GET"])
+def generate_status():
+    return {
+        "status": generation_status,
+        "result": generation_result
+    }
 
 if __name__ == "__main__":
     app.run(
